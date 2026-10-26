@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;font-family:'Manrope',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary": "#006a61", "on-primary-fixed": "#0d1c32", "tertiary-container": "#2a1700", "tertiary-fixed-dim": "#ffb95f", "on-secondary": "#ffffff", "tertiary-fixed": "#ffddb8", "inverse-surface": "#213145", "surface-dim": "#cbdbf5", "surface-container-lowest": "#ffffff", "on-surface": "#0b1c30", "on-tertiary-container": "#b87500", "on-primary-container": "#76849f", "on-primary": "#ffffff", "surface": "#f8f9ff", "primary-fixed": "#d6e3ff", "surface-container-high": "#dce9ff", "surface-container-highest": "#d3e4fe", "primary": "#000000", "surface-bright": "#f8f9ff", "on-secondary-fixed": "#00201d", "outline": "#75777e", "surface-tint": "#515f78", "on-surface-variant": "#44474d", "on-secondary-container": "#006f66", "error-container": "#ffdad6", "error": "#ba1a1a", "inverse-on-surface": "#eaf1ff", "primary-fixed-dim": "#b9c7e4", "inverse-primary": "#b9c7e4", "background": "#f8f9ff", "on-secondary-fixed-variant": "#005049", "surface-container": "#e5eeff", "on-error": "#ffffff", "on-error-container": "#93000a", "primary-container": "#0d1c32", "tertiary": "#000000", "on-background": "#0b1c30", "on-tertiary-fixed-variant": "#653e00", "secondary-fixed-dim": "#6bd8cb", "secondary-fixed": "#89f5e7", "secondary-container": "#86f2e4", "surface-container-low": "#eff4ff", "surface-variant": "#d3e4fe", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#2a1700", "outline-variant": "#c5c6cd", "on-primary-fixed-variant": "#39475f" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-lg": "1.5rem", "margin": "1rem", "space-md": "1rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "margin-desktop": "2.5rem", "gutter-desktop": "1.5rem", "gutter": "1rem", "margin-tablet": "1.5rem", "space-xl": "2rem" }, "fontFamily": { "display-lg": ["Space Grotesk"], "title-md": ["Manrope"], "headline-lg": ["Space Grotesk"], "metric-currency": ["Space Grotesk"], "label-md": ["Manrope"], "body-sm": ["Manrope"], "body-lg": ["Manrope"], "headline-sm": ["Space Grotesk"], "body-md": ["Manrope"], "label-xs": ["Manrope"], "display-lg-mobile": ["Space Grotesk"] }, "fontSize": { "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "title-md": ["16px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "metric-currency": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }], "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "label-xs": ["10px", { "lineHeight": "12px", "letterSpacing": "0.04em", "fontWeight": "700" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Smart Expense Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WlPFR8Qt1bfChTC5Gwt6Bp1Fp-ACF3cIaaGpEOAYLe61jt7pMj9rKXyrRqS7rluszr-SM2udOikIGZGamBpBb8x9OmeyubcHH5wEy7W6rDLYRycXUcSciBzirnqCb8oS7OcvPoi1clA9dXBQf4rODav226dm9ML8jXpXdaCQbhN-tZur80WV1T94qTUxuAfE5li3T785UDcVX_s_oat4d_rBotxO2Sq8xlBjFqLAqB9lS2rSoAQgAIwxZn"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight leading-none">Smart Expense</span><span class="font-label-xs text-label-xs text-on-surface-variant font-medium tracking-normal">Budgets</span></div></div><div class="flex items-center gap-space-xs"><button aria-label="Notifications" class="relative w-11 h-11 flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors"><span class="material-symbols-outlined text-[24px]">notifications</span><span class="absolute top-2 right-2 flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error font-label-xs text-[10px] font-bold leading-none ring-2 ring-surface">3</span></button><a aria-label="Profile" class="w-11 h-11 flex items-center justify-center" data-path="profile-settings" href="#"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-1 ring-outline-variant/30 hover:opacity-90 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAScGl4fNyyF8ULveWs_akSWFKD_7AMaGVZuyd_IV-j-gZTEmWZIWeeyAipcqk-Q3vNuXhpkdHD1TLVVXDg9g1xnBVA3YZ2KX4GqELDci_CzIijlOYV1tAIQ44hMvB5Gv-mIHpvMq9TmaTwtqBcE_ePT_9z4pp4dHpW-no4yV0s7zdhwnUz2O9Q3TnmKqungDK7U3xIHQ3sMSzTd1ee5sll_ExbpILmq7tsr_11aIG5lxm5jJrJ0wqQVw"/></a></div></div></header><main class="flex-1 w-full bg-surface pt-16 pb-28"><div class="flex flex-col w-full">
+<!-- Telemetry & Device Privacy Shield -->
+<div class="px-margin pt-space-md pb-space-sm flex flex-col gap-space-sm">
+<div class="bg-surface-container-low rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Android SMS Gateway Active</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant font-medium bg-surface-container px-2 py-0.5 rounded-full">Scanned 10m ago</span>
+</div>
+<div class="flex items-start gap-space-sm bg-surface-container-lowest/80 rounded-lg p-2.5">
+<span class="material-symbols-outlined text-[18px] text-secondary mt-0.5">verified_user</span>
+<div class="flex-1 min-w-0">
+<p class="font-label-xs text-label-xs text-on-surface font-semibold tracking-wide">100% On-Device Neural Parsing</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-snug">Bank SMS texts are processed locally in secure memory. Raw SMS content never touches external cloud servers.</p>
+</div>
+</div>
+</div>
+<!-- Review Status Header Info -->
+<div class="flex items-center justify-between mt-1 px-1">
+<div>
+<p class="font-title-md text-title-md text-on-surface font-bold">Unverified Queue</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">3 low-confidence transactions require your review</p>
+</div>
+<button aria-label="Parsing Guidelines" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" id="quick-help-btn">
+<span class="material-symbols-outlined text-[18px]">info</span>
+</button>
+</div>
+<!-- Segmented Tab Selector -->
+<div class="flex p-1 bg-surface-container rounded-xl gap-1">
+<button class="flex-1 py-2 text-center rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md font-bold shadow-sm transition-all flex items-center justify-center gap-1.5">
+<span>Needs Review</span>
+<span class="px-1.5 py-0.2 rounded-full bg-primary-container text-on-primary font-label-xs text-[10px]">3</span>
+</button>
+<button class="flex-1 py-2 text-center rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors flex items-center justify-center gap-1.5">
+<span>Flagged</span>
+<span class="px-1.5 py-0.2 rounded-full bg-error-container text-on-error-container font-label-xs text-[10px]">1</span>
+</button>
+<button class="flex-1 py-2 text-center rounded-lg text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors flex items-center justify-center gap-1.5">
+<span>Resolved</span>
+<span class="text-on-surface-variant font-label-xs text-[10px]">18</span>
+</button>
+</div>
+</div>
+<!-- Review Cards Stream -->
+<div class="px-margin flex flex-col gap-space-lg pb-24">
+<!-- Card 1: Ambiguous Category & Airport Duty Free -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<!-- Confidence & Status Ribbon -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed">
+<span class="material-symbols-outlined text-[14px]">bolt</span>
+<span class="font-label-xs text-label-xs font-bold uppercase tracking-wider">Confidence: 62% • Ambiguous Category</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Card Ending 4402</span>
+</div>
+<!-- Raw SMS Snippet Pill -->
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<div class="flex items-center gap-1.5 mb-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">sms</span>
+<span class="font-label-xs text-label-xs uppercase font-semibold">Bank SMS Excerpt</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-mono tracking-tight leading-relaxed select-all">
+          "Spent INR 1,840.00 at BLR-AIRPORT-DUTYFREE on HDFC Card ending 4402 on 26-Oct-24 18:20:11. Ref: 429810."
+        </p>
+</div>
+<!-- Parsed Editable Telemetry Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="bg-surface-container-low p-2.5 rounded-lg flex flex-col">
+<span class="font-label-xs text-label-xs text-on-surface-variant">Detected Amount</span>
+<span class="font-metric-currency text-metric-currency text-on-surface font-bold mt-0.5">₹1,840.00</span>
+</div>
+<div class="bg-surface-container-low p-2.5 rounded-lg flex flex-col">
+<span class="font-label-xs text-label-xs text-on-surface-variant">Transaction Time</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold mt-0.5">26 Oct, 6:20 PM</span>
+</div>
+</div>
+<!-- Merchant Correction Suggestion -->
+<div class="flex flex-col gap-1">
+<label class="font-label-xs text-label-xs text-on-surface-variant font-medium">Cleaned Merchant Label</label>
+<div class="flex items-center justify-between p-2.5 bg-surface-container-low rounded-lg">
+<div class="flex items-center gap-2 min-w-0">
+<span class="material-symbols-outlined text-[20px] text-secondary">store</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold truncate">Bengaluru Airport Duty Free</span>
+</div>
+<span class="font-label-xs text-label-xs text-secondary font-bold px-1.5 py-0.5 bg-secondary-container rounded">Auto-Cleaned</span>
+</div>
+</div>
+<!-- Category Selector with Contextual Chips -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-xs text-label-xs text-on-surface-variant font-medium">Select Verified Category</label>
+<div class="flex flex-wrap gap-1.5">
+<button class="px-3 py-1.5 rounded-full bg-primary-container text-on-primary font-label-md text-label-md font-semibold flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[16px]">flight</span>
+<span>Travel &amp; Transit</span>
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+<span>Shopping</span>
+</button>
+<button class="px-3 py-1.5 rounded-full bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px]">restaurant</span>
+<span>Food &amp; Dining</span>
+</button>
+</div>
+</div>
+<!-- Business Reimbursement Switch -->
+<label class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low cursor-pointer">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">corporate_fare</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Mark as Business / Reimbursable</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant">Excludes from personal monthly discretionary budget</span>
+</div>
+</div>
+<input class="w-5 h-5 rounded accent-secondary cursor-pointer" type="checkbox"/>
+</label>
+<!-- Primary Action Buttons -->
+<div class="flex gap-space-sm pt-1">
+<button class="flex-1 py-3 px-4 rounded-xl bg-primary-container text-on-primary font-title-md text-title-md font-semibold shadow-md active:scale-[0.99] transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">done_all</span>
+<span>Confirm &amp; Post</span>
+</button>
+<button class="py-3 px-4 rounded-xl bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container/30 font-title-md text-title-md font-semibold transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">delete_outline</span>
+</button>
+</div>
+</div>
+<!-- Card 2: Duplicate Alert & Subscription Reversal -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<!-- Confidence & Duplicate Warning Ribbon -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+<span class="font-label-xs text-label-xs font-bold uppercase tracking-wider">Confidence: 74% • Possible Duplicate (2x in 24h)</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant font-medium">UPI / Paytm</span>
+</div>
+<!-- Raw SMS Snippet -->
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<div class="flex items-center gap-1.5 mb-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">sms</span>
+<span class="font-label-xs text-label-xs uppercase font-semibold">Incoming SMS Body</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-mono tracking-tight leading-relaxed">
+          "Paid Rs 349 to Netflix Entertainment via Paytm UPI ref 994821 on 25-Oct-24."
+        </p>
+</div>
+<!-- Reconciliation Conflict Info -->
+<div class="p-3 bg-surface-container-high rounded-xl flex items-start gap-2.5">
+<span class="material-symbols-outlined text-[20px] text-primary-container mt-0.5">content_copy</span>
+<div class="flex-1 min-w-0">
+<p class="font-title-md text-title-md text-on-surface font-bold leading-tight">Matched Existing Ledger Entry</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Identical charge of <span class="font-semibold text-on-surface">₹349.00</span> was already posted on 24-Oct from Auto-Debit mandate.</p>
+</div>
+</div>
+<!-- Duplicate Handling Tri-Actions -->
+<div class="flex flex-col gap-2">
+<button class="w-full py-2.5 px-3 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary">merge</span>
+<span>Merge &amp; Deduplicate with Oct 24</span>
+</div>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+<button class="w-full py-2.5 px-3 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">add_circle_outline</span>
+<span>Keep as Separate (Legitimate 2nd Charge)</span>
+</div>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+<button class="w-full py-2.5 px-3 rounded-lg bg-surface-container text-on-surface-variant hover:text-error hover:bg-error-container/20 font-label-md text-label-md font-semibold transition-colors flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">currency_exchange</span>
+<span>Mark as Refund / Failed Reversal</span>
+</div>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Card 3: Low Confidence & Truncated Format -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-md">
+<!-- Confidence Badge -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-error-container text-on-error-container">
+<span class="material-symbols-outlined text-[14px]">priority_high</span>
+<span class="font-label-xs text-label-xs font-bold uppercase tracking-wider">Confidence: 48% • Unmapped Merchant</span>
+</div>
+<span class="font-label-xs text-label-xs text-on-surface-variant">PhonePe Gateway</span>
+</div>
+<!-- Raw SMS Snippet -->
+<div class="bg-surface-container-low p-2.5 rounded-lg">
+<div class="flex items-center gap-1.5 mb-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[14px]">sms</span>
+<span class="font-label-xs text-label-xs uppercase font-semibold">Raw Truncated Text</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-mono tracking-tight leading-relaxed">
+          "Txn of 520.00 at TAPRI-CHAI-CORNER successful via PhonePe..."
+        </p>
+</div>
+<!-- Quick Correction Form -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-xs text-label-xs text-on-surface-variant font-medium">Merchant Display Name</label>
+<div class="relative">
+<input class="w-full h-11 px-3 bg-surface-container-low rounded-lg font-title-md text-title-md text-on-surface outline-none focus:bg-surface-container transition-colors" type="text" value="Tapri Chai Corner"/>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant absolute right-3 top-3">edit</span>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1">
+<label class="font-label-xs text-label-xs text-on-surface-variant font-medium">Category</label>
+<div class="h-11 px-3 bg-surface-container-low rounded-lg flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-medium truncate">Food &amp; Dining</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<label class="font-label-xs text-label-xs text-on-surface-variant font-medium">Type</label>
+<div class="h-11 px-3 bg-surface-container-low rounded-lg flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-medium">Debit (Expense)</span>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Future Automation Memory Checkbox -->
+<label class="flex items-start gap-2 p-2.5 rounded-lg bg-surface-container-low cursor-pointer mt-1">
+<input checked="" class="w-4 h-4 mt-0.5 rounded accent-secondary cursor-pointer" type="checkbox"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Remember Auto-Rule</span>
+<span class="font-label-xs text-label-xs text-on-surface-variant leading-snug">Always map "TAPRI-CHAI-CORNER" to Food &amp; Dining in future scans</span>
+</div>
+</label>
+</div>
+<!-- Action Footer -->
+<div class="flex gap-space-sm pt-1">
+<button class="flex-1 py-3 px-4 rounded-xl bg-primary-container text-on-primary font-title-md text-title-md font-semibold shadow-md active:scale-[0.99] transition-transform flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Save Rule &amp; Post ₹520</span>
+</button>
+<button class="py-3 px-4 rounded-xl bg-surface-container text-on-surface-variant hover:text-error transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">block</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Sticky Bottom Batch Verification Utility -->
+<div class="fixed bottom-16 left-0 right-0 p-margin bg-surface/95 backdrop-blur-md z-40">
+<div class="max-w-md mx-auto flex items-center justify-between bg-primary-container text-on-primary p-3 rounded-2xl shadow-xl">
+<div class="flex items-center gap-2.5 pl-1">
+<span class="material-symbols-outlined text-[22px] text-secondary-fixed">auto_awesome</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-primary leading-tight">Batch Parser Ready</span>
+<span class="font-label-xs text-label-xs text-inverse-primary">Apply 2 smart suggestions</span>
+</div>
+</div>
+<button class="py-2 px-3.5 bg-secondary-fixed text-on-secondary-fixed rounded-xl font-label-md text-label-md font-bold flex items-center gap-1 active:scale-95 transition-transform shadow-sm">
+<span>Approve All</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary-container font-semibold"><div class="h-16 px-space-xs flex items-center justify-around relative"><a class="flex-1 flex flex-col items-center justify-center h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[22px]">dashboard</span><span class="font-label-xs text-label-xs mt-1">Overview</span></a><a class="flex-1 flex flex-col items-center justify-center h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="transactions" href="#"><span class="material-symbols-outlined text-[22px]">receipt_long</span><span class="font-label-xs text-label-xs mt-1">Ledger</span></a><div class="relative flex items-center justify-center px-1"><a aria-label="Fast Add Expense" class="-top-4 relative w-12 h-12 rounded-full bg-primary-container text-on-primary flex items-center justify-center shadow-[0_8px_16px_rgba(13,28,50,0.24)] hover:bg-inverse-surface transition-transform active:scale-95" data-path="quick-add-expense" href="#"><span class="material-symbols-outlined text-[24px]">add</span></a></div><a class="flex-1 flex flex-col items-center justify-center h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="budgets" href="#"><span class="material-symbols-outlined text-[22px]">donut_large</span><span class="font-label-xs text-label-xs mt-1">Budgets</span></a><a class="flex-1 flex flex-col items-center justify-center h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="insights" href="#"><span class="material-symbols-outlined text-[22px]">insights</span><span class="font-label-xs text-label-xs mt-1">Insights</span></a><a class="flex-1 flex flex-col items-center justify-center h-full text-on-surface-variant hover:text-on-surface transition-colors" data-path="review-sources" href="#"><span class="material-symbols-outlined text-[22px]">fact_check</span><span class="font-label-xs text-label-xs mt-1">Review</span></a></div></nav></body></html>
