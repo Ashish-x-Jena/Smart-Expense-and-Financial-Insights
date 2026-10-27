@@ -15,6 +15,8 @@ export const OverviewScreen: React.FC = () => {
     setActiveTab,
     setQuickAddOpen,
     setAiAssistantOpen,
+    currentUser,
+    userPreferences,
   } = useFinance();
 
   const totalPool = budgets.reduce((sum, b) => sum + b.limit, 0);
@@ -33,7 +35,7 @@ export const OverviewScreen: React.FC = () => {
               Financial Control Hub
             </span>
             <h1 className="font-['Space_Grotesk'] text-xl sm:text-2xl font-bold text-[#0b1c30]">
-              Welcome back, Priyansh
+              Welcome back, {(currentUser?.name || userPreferences.name).split(' ')[0]}
             </h1>
           </div>
           <button

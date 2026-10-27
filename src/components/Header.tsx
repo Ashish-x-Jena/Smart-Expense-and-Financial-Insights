@@ -11,9 +11,12 @@ export const Header: React.FC = () => {
     notifications,
     markNotificationRead,
     setQuickAddOpen,
+    currentUser,
+    logout,
   } = useFinance();
 
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
 
   const getSubheaderTitle = (tab: AppTab): string => {
     switch (tab) {
@@ -196,18 +199,71 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          {/* Profile Avatar -> Settings */}
-          <button
-            onClick={() => setActiveTab('settings')}
-            aria-label="Profile and Settings"
-            className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full hover:bg-[#eff4ff] transition-colors"
-          >
-            <img
-              src={userPreferences.avatarUrl}
-              alt={userPreferences.name}
-              className="w-8 h-8 rounded-full object-cover ring-1 ring-slate-200"
-            />
-          </button>
+          {/* Profile Avatar Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
+              aria-label="Profile menu"
+              className="flex items-center gap-2 pl-1 pr-1.5 py-1 rounded-full hover:bg-[#eff4ff] transition-colors cursor-pointer"
+            >
+              <img
+                src={currentUser?.avatarUrl || userPreferences.avatarUrl}
+                alt={currentUser?.name || userPreferences.name}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-[#006a61]/30 hover:ring-[#006a61] transition-all"
+              />
+            </button>
+
+            {profileDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 p-3 z-50 animate-in fade-in slide-in-from-top-2">
+                <div className="flex items-center gap-3 pb-3 border-b border-slate-100 px-1">
+                  <img
+                    src={currentUser?.avatarUrl || userPreferences.avatarUrl}
+                    alt={currentUser?.name || userPreferences.name}
+                    className="w-10 h-10 rounded-full object-cover ring-1 ring-slate-200"
+                  />
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-['Space_Grotesk'] font-bold text-xs text-[#0b1c30] truncate">
+                      {currentUser?.name || userPreferences.name}
+                    </span>
+                    <span className="font-['Manrope'] text-[11px] text-[#75777e] truncate">
+                      {currentUser?.email || userPreferences.email}
+                    </span>
+                    <span className="inline-block mt-0.5 px-2 py-0.5 rounded-full bg-[#eff4ff] text-[#006a61] text-[9px] font-bold w-max">
+                      {currentUser?.role || 'Pro Member'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1 pt-2">
+                  <button
+                    onClick={() => {
+                      setActiveTab('settings');
+                      setProfileDropdownOpen(false);
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#eff4ff] text-left text-xs font-['Manrope'] font-semibold text-[#0b1c30] transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px] text-[#44474d]">
+                      settings
+                    </span>
+                    <span>Settings & Preferences</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      logout();
+                    }}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-rose-50 text-left text-xs font-['Manrope'] font-semibold text-rose-600 transition-colors cursor-pointer"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      logout
+                    </span>
+                    <span>Sign Out</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

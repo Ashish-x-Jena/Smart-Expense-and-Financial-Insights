@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFinance } from '../context/FinanceContext';
 
 export const BudgetsScreen: React.FC = () => {
@@ -8,8 +8,10 @@ export const BudgetsScreen: React.FC = () => {
     projectedMonthEnd,
     createBudget,
     rebalanceBudgets,
-    userPreferences,
-    updatePreferences,
+    monthlyBudgetPool,
+    setMonthlyBudgetPool,
+    distributeBudgetPool,
+    firebaseSyncStatus,
   } = useFinance();
 
   const [newBudgetModalOpen, setNewBudgetModalOpen] = useState(false);
@@ -19,13 +21,64 @@ export const BudgetsScreen: React.FC = () => {
   const [globalAlertsEnabled, setGlobalAlertsEnabled] = useState(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const totalPool = budgets.reduce((sum, b) => sum + b.limit, 0);
-  const poolRemaining = Math.max(0, totalPool - totalSpent);
-  const poolPercentage = totalPool > 0 ? Math.round((totalSpent / totalPool) * 1000) / 10 : 0;
+  // Manual & Scrollable Monthly Budget Pool State
+  const [poolInputVal, setPoolInputVal] = useState<string>(monthlyBudgetPool.toString());
+  const [isPoolExpanded, setIsPoolExpanded] = useState<boolean>(true);
+
+  // Keep manual input in sync when context pool changes
+  useEffect(() => {
+    setPoolInputVal(monthlyBudgetPool.toString());
+  }, [monthlyBudgetPool]);
+
+  // Derived budget telemetry
+  const totalAllocated = budgets.reduce((sum, b) => sum + b.limit, 0);
+  const unallocatedBuffer = monthlyBudgetPool - totalAllocated;
+  const poolRemaining = Math.max(0, monthlyBudgetPool - totalSpent);
+  const poolPercentage =
+    monthlyBudgetPool > 0 ? Math.round((totalSpent / monthlyBudgetPool) * 1000) / 10 : 0;
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 2800);
+  };
+
+  const handleManualPoolSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const parsed = parseFloat(poolInputVal.replace(/[^0-9.]/g, ''));
+    if (isNaN(parsed) || parsed < 1000) {
+      showToast('Please enter a valid monthly budget pool (min ₹1,000)');
+      return;
+    }
+    setMonthlyBudgetPool(parsed);
+    showToast(`Monthly budget pool updated to ₹${parsed.toLocaleString('en-IN')}`);
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value, 10);
+    setMonthlyBudgetPool(val);
+    setPoolInputVal(val.toString());
+  };
+
+  const handleStepPool = (delta: number) => {
+    const nextVal = Math.max(1000, monthlyBudgetPool + delta);
+    setMonthlyBudgetPool(nextVal);
+    setPoolInputVal(nextVal.toString());
+    showToast(`Pool adjusted to ₹${nextVal.toLocaleString('en-IN')}`);
+  };
+
+  const handleDistributePool = () => {
+    distributeBudgetPool(monthlyBudgetPool);
+    showToast(
+      `Distributed ₹${monthlyBudgetPool.toLocaleString('en-IN')} proportionally across ${
+        budgets.length
+      } categories!`
+    );
+  };
+
+  const handleMatchPoolToSum = () => {
+    setMonthlyBudgetPool(totalAllocated);
+    setPoolInputVal(totalAllocated.toString());
+    showToast(`Monthly pool matched to category sum: ₹${totalAllocated.toLocaleString('en-IN')}`);
   };
 
   const handleCreateBudget = (e: React.FormEvent) => {
@@ -81,14 +134,22 @@ export const BudgetsScreen: React.FC = () => {
                 Monthly Budget Pool
               </span>
               <span className="font-['Space_Grotesk'] text-2xl sm:text-3xl font-bold tracking-tight mt-0.5 tabular-nums">
-                ₹{totalPool.toLocaleString('en-IN')}.00
+                ₹{monthlyBudgetPool.toLocaleString('en-IN')}.00
               </span>
             </div>
-            <div className="flex flex-col items-end">
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#006a61] text-white font-['Manrope'] text-[11px] font-bold">
-                <span className="material-symbols-outlined text-[14px]">shield</span> Safety: OK
-              </span>
-              <span className="font-['Manrope'] text-xs text-[#76849f] mt-1 font-semibold tabular-nums">
+            <div className="flex flex-col items-end gap-1">
+              <div className="flex items-center gap-1.5">
+                {firebaseSyncStatus === 'synced' && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#182a40] border border-[#86f2e4]/40 text-[#86f2e4] font-['Manrope'] text-[10px] font-bold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#86f2e4] animate-pulse"></span>
+                    Firebase
+                  </span>
+                )}
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#006a61] text-white font-['Manrope'] text-[11px] font-bold">
+                  <span className="material-symbols-outlined text-[14px]">shield</span> Safety: OK
+                </span>
+              </div>
+              <span className="font-['Manrope'] text-xs text-[#76849f] mt-0.5 font-semibold tabular-nums">
                 {poolPercentage}% consumed
               </span>
             </div>
@@ -143,6 +204,207 @@ export const BudgetsScreen: React.FC = () => {
               <span>New Category</span>
             </button>
           </div>
+        </section>
+
+        {/* Interactive Monthly Budget Pool Controller (Manual & Scrollable) */}
+        <section className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200/70 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-full bg-[#86f2e4]/30 text-[#006f66] flex items-center justify-center font-bold">
+                <span className="material-symbols-outlined text-[22px]">account_balance_wallet</span>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-['Space_Grotesk'] text-base font-bold text-[#0b1c30]">
+                    Monthly Budget Pool Controller
+                  </h3>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#eff4ff] text-[#006a61] border border-blue-100">
+                    Scroll & Manual
+                  </span>
+                </div>
+                <span className="font-['Manrope'] text-xs text-[#44474d]">
+                  Configure ceiling via numeric input or continuous scroll slider
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsPoolExpanded(!isPoolExpanded)}
+              className="p-1.5 text-[#44474d] hover:text-[#0b1c30] rounded-lg hover:bg-slate-100 transition-colors"
+              aria-label="Toggle budget pool panel"
+            >
+              <span className="material-symbols-outlined text-[22px]">
+                {isPoolExpanded ? 'expand_less' : 'expand_more'}
+              </span>
+            </button>
+          </div>
+
+          {isPoolExpanded && (
+            <div className="flex flex-col gap-4 pt-1 animate-in fade-in duration-200">
+              {/* Part 1: Manual Numeric Input Field */}
+              <form
+                onSubmit={handleManualPoolSubmit}
+                className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center"
+              >
+                <div className="relative flex-1">
+                  <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-['Space_Grotesk'] text-base font-bold text-[#006a61]">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min="1000"
+                    max="500000"
+                    step="500"
+                    value={poolInputVal}
+                    onChange={(e) => setPoolInputVal(e.target.value)}
+                    onBlur={() => handleManualPoolSubmit()}
+                    placeholder="Enter monthly pool ceiling..."
+                    className="w-full h-11 pl-8 pr-4 bg-[#eff4ff] border border-slate-200 rounded-xl font-['Space_Grotesk'] text-base font-bold text-[#0b1c30] focus:outline-none focus:ring-2 focus:ring-[#006a61] transition-all tabular-nums"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="h-11 px-4 rounded-xl bg-[#0d1c32] text-white font-['Space_Grotesk'] text-xs font-semibold hover:bg-[#213145] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[16px] text-[#86f2e4]">
+                    check_circle
+                  </span>
+                  <span>Set Pool</span>
+                </button>
+              </form>
+
+              {/* Quick Stepper Pills */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-['Manrope'] text-[11px] text-[#44474d] font-semibold mr-1">
+                  Quick Adjust:
+                </span>
+                {[-5000, -1000, 1000, 5000, 10000].map((delta) => (
+                  <button
+                    key={delta}
+                    type="button"
+                    onClick={() => handleStepPool(delta)}
+                    className="px-2.5 py-1 rounded-lg bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] font-['Manrope'] text-xs font-bold transition-all active:scale-95 border border-slate-200/60"
+                  >
+                    {delta > 0
+                      ? `+ ₹${(delta / 1000).toLocaleString()}k`
+                      : `- ₹${(Math.abs(delta) / 1000).toLocaleString()}k`}
+                  </button>
+                ))}
+              </div>
+
+              {/* Part 2: Scrollable / Drag Range Slider */}
+              <div className="flex flex-col gap-1.5 bg-[#eff4ff]/60 p-3.5 rounded-xl border border-slate-100">
+                <div className="flex justify-between items-center text-xs">
+                  <span className="font-['Manrope'] text-[11px] text-[#44474d] font-medium flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[15px] text-[#006a61]">
+                      swipe
+                    </span>
+                    Scroll / Drag Dial
+                  </span>
+                  <span className="font-['Space_Grotesk'] text-sm font-bold text-[#006a61] tabular-nums">
+                    ₹{monthlyBudgetPool.toLocaleString('en-IN')}{' '}
+                    <span className="text-[11px] font-normal text-[#44474d]">/ month</span>
+                  </span>
+                </div>
+
+                <input
+                  type="range"
+                  min="10000"
+                  max="200000"
+                  step="1000"
+                  value={Math.min(200000, Math.max(10000, monthlyBudgetPool))}
+                  onChange={handleSliderChange}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-[#006a61]"
+                />
+
+                {/* Slider Scale Ticks */}
+                <div className="flex justify-between text-[10px] font-['Manrope'] text-[#76849f] font-semibold px-0.5">
+                  <span>₹10K</span>
+                  <span>₹50K</span>
+                  <span>₹100K</span>
+                  <span>₹150K</span>
+                  <span>₹200K+</span>
+                </div>
+              </div>
+
+              {/* Part 3: Allocation Balancing & Buffer Breakdown */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                <div className="bg-[#eff4ff] p-3 rounded-xl flex flex-col">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#44474d]">
+                    Target Pool
+                  </span>
+                  <span className="font-['Space_Grotesk'] text-base font-bold text-[#0b1c30] mt-0.5 tabular-nums">
+                    ₹{monthlyBudgetPool.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-[10px] text-[#006a61] font-semibold mt-0.5">
+                    Monthly ceiling
+                  </span>
+                </div>
+
+                <div className="bg-[#eff4ff] p-3 rounded-xl flex flex-col">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#44474d]">
+                    Categories Sum
+                  </span>
+                  <span className="font-['Space_Grotesk'] text-base font-bold text-[#0b1c30] mt-0.5 tabular-nums">
+                    ₹{totalAllocated.toLocaleString('en-IN')}
+                  </span>
+                  <span className="text-[10px] text-[#44474d] font-semibold mt-0.5">
+                    Across {budgets.length} categories
+                  </span>
+                </div>
+
+                <div
+                  className={`p-3 rounded-xl flex flex-col ${
+                    unallocatedBuffer >= 0
+                      ? 'bg-[#86f2e4]/20 border border-[#86f2e4]/40'
+                      : 'bg-[#ffdad6] border border-[#ba1a1a]/30'
+                  }`}
+                >
+                  <span
+                    className={`text-[10px] uppercase font-bold tracking-wider ${
+                      unallocatedBuffer >= 0 ? 'text-[#006f66]' : 'text-[#ba1a1a]'
+                    }`}
+                  >
+                    {unallocatedBuffer >= 0 ? 'Safety Buffer' : 'Over-Allocated'}
+                  </span>
+                  <span
+                    className={`font-['Space_Grotesk'] text-base font-bold mt-0.5 tabular-nums ${
+                      unallocatedBuffer >= 0 ? 'text-[#006f66]' : 'text-[#ba1a1a]'
+                    }`}
+                  >
+                    ₹{Math.abs(unallocatedBuffer).toLocaleString('en-IN')}
+                  </span>
+                  <span
+                    className={`text-[10px] font-semibold mt-0.5 ${
+                      unallocatedBuffer >= 0 ? 'text-[#006f66]' : 'text-[#ba1a1a]'
+                    }`}
+                  >
+                    {unallocatedBuffer >= 0 ? 'Unassigned cushion' : 'Exceeds target pool'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons for Pool Balancing */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleDistributePool}
+                  className="flex-1 py-2.5 px-3 rounded-xl bg-[#006a61] text-white hover:bg-[#005049] active:scale-95 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[16px]">balance</span>
+                  <span>Distribute Pool Across Categories</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleMatchPoolToSum}
+                  className="py-2.5 px-3 rounded-xl bg-[#eff4ff] hover:bg-[#dce9ff] text-[#0b1c30] active:scale-95 transition-all text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-200"
+                >
+                  <span className="material-symbols-outlined text-[16px]">sync_alt</span>
+                  <span>Match Pool to Category Sum</span>
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Savings Target Tracker Card */}

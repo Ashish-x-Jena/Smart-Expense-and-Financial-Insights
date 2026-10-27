@@ -17,6 +17,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
     resetDemoData,
     transactions,
     setSmsExplainerOpen,
+    currentUser,
+    logout,
   } = useFinance();
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -61,8 +63,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div className="flex items-center gap-4 mb-4">
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-white/10 shrink-0">
               <img
-                src={userPreferences.avatarUrl}
-                alt={userPreferences.name}
+                src={currentUser?.avatarUrl || userPreferences.avatarUrl}
+                alt={currentUser?.name || userPreferences.name}
                 className="w-full h-full object-cover"
               />
               <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#006a61] ring-2 ring-[#0d1c32]"></div>
@@ -70,16 +72,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <div className="flex flex-col min-w-0 flex-1">
               <div className="flex items-center gap-1.5">
                 <span className="font-['Space_Grotesk'] text-base font-bold text-white truncate">
-                  {userPreferences.name}
+                  {currentUser?.name || userPreferences.name}
                 </span>
                 <span className="material-symbols-outlined text-[16px] text-[#89f5e7]">
                   verified
                 </span>
               </div>
               <span className="font-['Manrope'] text-xs text-[#76849f] truncate">
-                {userPreferences.email}
+                {currentUser?.email || userPreferences.email}
               </span>
             </div>
+
+            <button
+              onClick={() => logout()}
+              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-rose-500/20 text-[#ffdad6] text-xs font-['Manrope'] font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0 border border-white/10"
+              title="Sign Out"
+            >
+              <span className="material-symbols-outlined text-[16px]">logout</span>
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
 
           {/* Security State Badge */}

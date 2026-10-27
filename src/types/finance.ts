@@ -101,4 +101,16 @@ export interface UserPreferences {
   quietHours: string;
   activeThresholds: number[]; // e.g. [50, 75, 90, 100]
   monthlyExportFormat: 'csv' | 'pdf' | 'json';
+  monthlyBudgetPool?: number;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  phoneNumber?: string;
+  avatarUrl: string;
+  role?: string;
+  token?: string;
+  createdAt?: string;
 }

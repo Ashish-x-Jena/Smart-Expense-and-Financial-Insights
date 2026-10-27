@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "entities": {
+    "users": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "monthlyBudgetPool": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "transactions": {
+      "title": "Transaction",
+      "description": "Expense or income transactions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "type": { "type": "string", "enum": ["debit", "credit", "transfer", "refund", "reversal"] },
+        "merchant": { "type": "string" },
+        "category": { "type": "string" },
+        "subCategory": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "sourceType": { "type": "string" },
+        "sourceProvider": { "type": "string" },
+        "notes": { "type": "string" },
+        "status": { "type": "string" },
+        "parsingConfidence": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "amount", "type", "merchant", "category", "date"]
+    },
+    "budgets": {
+      "title": "Budget",
+      "description": "Monthly budget categories and limits",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "categoryName": { "type": "string" },
+        "icon": { "type": "string" },
+        "subtext": { "type": "string" },
+        "limit": { "type": "number" },
+        "spent": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "categoryName", "limit"]
+    },
+    "userPreferences": {
+      "title": "UserPreferences",
+      "description": "User application settings",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "monthlyBudgetPool": { "type": "number" },
+        "currency": { "type": "string" },
+        "smsAutoDetect": { "type": "boolean" },
+        "biometricLock": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "users",
+      "description": "User profile records"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "transactions",
+      "description": "Transactions belonging to a user"
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": "budgets",
+      "description": "Category budgets belonging to a user"
+    },
+    "/users/{userId}/preferences/{prefId}": {
+      "schema": "userPreferences",
+      "description": "User preferences and budget pool settings"
+    }
+  }
+}

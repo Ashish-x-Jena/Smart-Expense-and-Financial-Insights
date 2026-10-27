@@ -13,10 +13,16 @@ import { QuickAddModal } from './components/QuickAddModal';
 import { CsvModal } from './components/CsvModal';
 import { FinancialAssistantModal } from './components/FinancialAssistantModal';
 import { SmsBackgroundExplainerModal } from './components/SmsBackgroundExplainerModal';
+import { LoginScreen } from './screens/LoginScreen';
 
 const MainContent: React.FC = () => {
-  const { activeTab, setActiveTab } = useFinance();
+  const { activeTab, setActiveTab, isAuthenticated } = useFinance();
   const [csvModalOpen, setCsvModalOpen] = useState(false);
+
+  // Protected Route Check: Unauthenticated users are served the Login & Sign-Up flow
+  if (!isAuthenticated) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-[#f8f9ff] text-[#0b1c30]">

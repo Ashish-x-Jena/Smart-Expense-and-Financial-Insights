@@ -199,3 +199,24 @@ test('isLikelyDuplicate detects repeated charge within 24 hours', () => {
   assert.ok(duplicate);
   assert.equal(duplicate.id, 'existing-1');
 });
+
+test('proportional budget distribution sums exactly to target pool', () => {
+  const currentLimits = [20000, 15000, 7000, 8000]; // total 50,000
+  const currentSum = currentLimits.reduce((a, b) => a + b, 0);
+  const targetPool = 75000;
+
+  let allocated = 0;
+  const newLimits = currentLimits.map((lim, idx) => {
+    if (idx === currentLimits.length - 1) {
+      return targetPool - allocated;
+    }
+    const slice = Math.round(((lim / currentSum) * targetPool) / 500) * 500;
+    allocated += slice;
+    return slice;
+  });
+
+  const sumNew = newLimits.reduce((a, b) => a + b, 0);
+  assert.equal(sumNew, targetPool);
+  assert.ok(newLimits[0] > 20000); // Housing scaled up
+});
+

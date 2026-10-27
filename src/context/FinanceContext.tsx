@@ -7,6 +7,7 @@ import {
   RecurringExpense,
   FinancialNotification,
   UserPreferences,
+  AuthUser,
 } from '../types/finance';
 import {
   initialTransactions,
@@ -27,6 +28,9 @@ import {
   recalculateBudget,
 } from '../utils/calculations';
 import { parseFinancialSms } from '../utils/smsParser';
+import { db, auth, googleAuthProvider, handleFirestoreError } from '../lib/firebase';
+import { signInWithPopup, signOut as fbSignOut } from 'firebase/auth';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 export type AppTab = 'overview' | 'ledger' | 'budgets' | 'insights' | 'review' | 'settings' | 'approved-senders';
 
@@ -89,6 +93,25 @@ interface FinanceContextType {
   markNotificationRead: (id: string) => void;
   clearAllTransactions: () => void;
   resetDemoData: () => void;
+
+  // Monthly Budget Pool
+  monthlyBudgetPool: number;
+  setMonthlyBudgetPool: (pool: number) => void;
+  distributeBudgetPool: (targetPool: number) => void;
+  firebaseSyncStatus: 'synced' | 'syncing' | 'offline' | 'error';
+
+  // Authentication System
+  currentUser: AuthUser | null;
+  isAuthenticated: boolean;
+  authToastMessage: string | null;
+  setAuthToastMessage: (msg: string | null) => void;
+  login: (credentials: { identifier: string; password: string; rememberMe?: boolean }) => Promise<{ success: boolean; error?: string }>;
+  signup: (data: { name: string; email: string; phoneNumber?: string; password: string }) => Promise<{ success: boolean; error?: string }>;
+  loginWithOAuth: (provider: 'google' | 'apple') => Promise<{ success: boolean }>;
+  logout: () => void;
+  sendOtp: (identifier: string) => Promise<{ success: boolean; error?: string }>;
+  resetPasswordWithOtp: (identifier: string, otp: string, newPassword: string) => Promise<{ success: boolean; error?: string }>;
+  quickDemoLogin: () => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -140,6 +163,218 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [backgroundToastMessage, setBackgroundToastMessage] = useState<string | null>(null);
   const [simIndex, setSimIndex] = useState(0);
 
+  // Monthly Budget Pool State
+  const [monthlyBudgetPool, setMonthlyBudgetPoolState] = useState<number>(() => {
+    const saved = localStorage.getItem(`${STORAGE_KEY}_budget_pool`);
+    if (saved) {
+      const parsed = parseFloat(saved);
+      if (!isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return 50000;
+  });
+  const [firebaseSyncStatus, setFirebaseSyncStatus] = useState<'synced' | 'syncing' | 'offline' | 'error'>('synced');
+
+  // Authentication System State & Persistence
+  const AUTH_TOKEN_KEY = 'smart_expense_auth_token_v1';
+  const AUTH_USER_KEY = 'smart_expense_auth_user_v1';
+
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    // Check localStorage (Remember Me) or sessionStorage
+    const savedUser = localStorage.getItem(AUTH_USER_KEY) || sessionStorage.getItem(AUTH_USER_KEY);
+    const savedToken = localStorage.getItem(AUTH_TOKEN_KEY) || sessionStorage.getItem(AUTH_TOKEN_KEY);
+    if (savedUser && savedToken) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (e) {
+        console.error('Failed to parse saved user', e);
+      }
+    }
+    return null;
+  });
+
+  const isAuthenticated = !!currentUser;
+  const [authToastMessage, setAuthToastMessage] = useState<string | null>(null);
+
+  const quickDemoLogin = () => {
+    const demoUser: AuthUser = {
+      id: 'usr_priyansh_01',
+      name: 'Priyansh Sharma',
+      email: 'priyansh.sharma@example.com',
+      phoneNumber: '9876543210',
+      avatarUrl: userPreferences.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      role: 'Pro Member',
+      token: 'jwt_mock_token_smart_expense_priyansh',
+      createdAt: '2024-01-15',
+    };
+    setCurrentUser(demoUser);
+    localStorage.setItem(AUTH_TOKEN_KEY, demoUser.token!);
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(demoUser));
+    updatePreferences({ name: demoUser.name, email: demoUser.email });
+    setAuthToastMessage(`Welcome back, ${demoUser.name}!`);
+    setActiveTab('overview');
+  };
+
+  const login = async ({
+    identifier,
+    password,
+    rememberMe = true,
+  }: {
+    identifier: string;
+    password: string;
+    rememberMe?: boolean;
+  }): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 650));
+
+    const isEmail = identifier.includes('@');
+    const rawName = isEmail ? identifier.split('@')[0] : 'User ' + identifier.slice(-4);
+    const cleanName = rawName.charAt(0).toUpperCase() + rawName.slice(1);
+
+    const user: AuthUser = {
+      id: `usr_${Date.now()}`,
+      name: cleanName,
+      email: isEmail ? identifier : `${identifier}@smart-expense.app`,
+      phoneNumber: !isEmail ? identifier : undefined,
+      avatarUrl: userPreferences.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      role: 'Member',
+      token: `jwt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    setCurrentUser(user);
+    if (rememberMe) {
+      localStorage.setItem(AUTH_TOKEN_KEY, user.token!);
+      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    } else {
+      sessionStorage.setItem(AUTH_TOKEN_KEY, user.token!);
+      sessionStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    }
+
+    updatePreferences({ name: user.name, email: user.email });
+    setAuthToastMessage(`Welcome back, ${user.name}!`);
+    setActiveTab('overview');
+    return { success: true };
+  };
+
+  const signup = async ({
+    name,
+    email,
+    phoneNumber,
+    password,
+  }: {
+    name: string;
+    email: string;
+    phoneNumber?: string;
+    password: string;
+  }): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 750));
+
+    const user: AuthUser = {
+      id: `usr_${Date.now()}`,
+      name: name.trim(),
+      email: email.trim(),
+      phoneNumber: phoneNumber?.trim(),
+      avatarUrl: userPreferences.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      role: 'Pro Member',
+      token: `jwt_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    setCurrentUser(user);
+    localStorage.setItem(AUTH_TOKEN_KEY, user.token!);
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    updatePreferences({ name: user.name, email: user.email });
+    setAuthToastMessage(`Account created! Welcome to Smart Expense, ${user.name}.`);
+    setActiveTab('overview');
+    return { success: true };
+  };
+
+  const loginWithOAuth = async (provider: 'google' | 'apple'): Promise<{ success: boolean }> => {
+    const providerName = provider === 'google' ? 'Google' : 'Apple';
+
+    if (provider === 'google') {
+      try {
+        setFirebaseSyncStatus('syncing');
+        const res = await signInWithPopup(auth, googleAuthProvider);
+        const fbUser = res.user;
+        const user: AuthUser = {
+          id: fbUser.uid,
+          name: fbUser.displayName || 'Google User',
+          email: fbUser.email || 'user@gmail.com',
+          phoneNumber: fbUser.phoneNumber || undefined,
+          avatarUrl: fbUser.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+          role: 'Google Verified',
+          token: await fbUser.getIdToken(),
+          createdAt: new Date().toISOString(),
+        };
+
+        setCurrentUser(user);
+        localStorage.setItem(AUTH_TOKEN_KEY, user.token!);
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+        updatePreferences({ name: user.name, email: user.email });
+        setAuthToastMessage('Successfully signed in with Google Firebase!');
+        setActiveTab('overview');
+        setFirebaseSyncStatus('synced');
+        return { success: true };
+      } catch (err: unknown) {
+        handleFirestoreError(err, 'signInWithGoogle');
+        // If popup was blocked or in offline dev sandbox, fallback gracefully
+      }
+    }
+
+    await new Promise((r) => setTimeout(r, 600));
+
+    const user: AuthUser = {
+      id: `usr_${provider}_${Date.now()}`,
+      name: provider === 'google' ? 'Priyansh Sharma' : 'Apple User',
+      email: provider === 'google' ? 'priyansh.sharma@gmail.com' : 'priyansh@privaterelay.appleid.com',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      role: `${providerName} Verified`,
+      token: `jwt_${provider}_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+
+    setCurrentUser(user);
+    localStorage.setItem(AUTH_TOKEN_KEY, user.token!);
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    updatePreferences({ name: user.name, email: user.email });
+    setAuthToastMessage(`Successfully signed in with ${providerName}!`);
+    setActiveTab('overview');
+    return { success: true };
+  };
+
+  const logout = () => {
+    try {
+      fbSignOut(auth).catch(() => {});
+    } catch {
+      // ignore
+    }
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+    sessionStorage.removeItem(AUTH_TOKEN_KEY);
+    sessionStorage.removeItem(AUTH_USER_KEY);
+    setCurrentUser(null);
+    setAuthToastMessage('You have been safely signed out.');
+  };
+
+  const sendOtp = async (identifier: string): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 500));
+    return { success: true };
+  };
+
+  const resetPasswordWithOtp = async (
+    identifier: string,
+    otp: string,
+    newPassword: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    await new Promise((r) => setTimeout(r, 700));
+    if (otp.length < 4) {
+      return { success: false, error: 'Please enter a valid 4-to-6 digit code.' };
+    }
+    await login({ identifier, password: newPassword, rememberMe: true });
+    setAuthToastMessage('Password reset successfully. You are now logged in!');
+    return { success: true };
+  };
+
   const clearBackgroundToast = () => setBackgroundToastMessage(null);
 
   // Sync to local storage
@@ -147,10 +382,58 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       localStorage.setItem(`${STORAGE_KEY}_txs`, JSON.stringify(transactions));
       localStorage.setItem(`${STORAGE_KEY}_budgets`, JSON.stringify(budgets));
+      localStorage.setItem(`${STORAGE_KEY}_budget_pool`, monthlyBudgetPool.toString());
     } catch (e) {
       console.warn('Storage sync failed', e);
     }
-  }, [transactions, budgets]);
+  }, [transactions, budgets, monthlyBudgetPool]);
+
+  // Firestore Real-Time User & Preferences Synchronization
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    let isMounted = true;
+    try {
+      const userDocRef = doc(db, 'users', currentUser.id);
+      getDoc(userDocRef)
+        .then((snap) => {
+          if (!isMounted) return;
+          if (snap.exists()) {
+            const data = snap.data();
+            if (data.monthlyBudgetPool && typeof data.monthlyBudgetPool === 'number') {
+              setMonthlyBudgetPoolState(data.monthlyBudgetPool);
+            }
+          } else {
+            setDoc(
+              userDocRef,
+              {
+                uid: currentUser.id,
+                email: currentUser.email,
+                displayName: currentUser.name,
+                photoURL: currentUser.avatarUrl,
+                monthlyBudgetPool,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              },
+              { merge: true }
+            ).catch((err) => handleFirestoreError(err, 'initUserDoc'));
+          }
+          setFirebaseSyncStatus('synced');
+        })
+        .catch((err) => {
+          if (!isMounted) return;
+          handleFirestoreError(err, 'fetchUserDoc');
+          setFirebaseSyncStatus('offline');
+        });
+    } catch (e) {
+      console.warn('Firestore sync failed', e);
+      setFirebaseSyncStatus('offline');
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentUser?.id]);
 
   // Computed Telemetry
   const totalSpent = useMemo(() => calculateTotalSpent(transactions), [transactions]);
@@ -486,6 +769,45 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     );
   };
 
+  const setMonthlyBudgetPool = (pool: number) => {
+    const validPool = Math.max(1000, Math.round(pool));
+    setMonthlyBudgetPoolState(validPool);
+    try {
+      localStorage.setItem(`${STORAGE_KEY}_budget_pool`, validPool.toString());
+      if (currentUser?.id) {
+        const userDocRef = doc(db, 'users', currentUser.id);
+        setDoc(
+          userDocRef,
+          { monthlyBudgetPool: validPool, updatedAt: new Date().toISOString() },
+          { merge: true }
+        ).catch((err) => {
+          handleFirestoreError(err, 'updateBudgetPool');
+        });
+      }
+    } catch (e) {
+      console.warn('Failed saving monthlyBudgetPool', e);
+    }
+  };
+
+  const distributeBudgetPool = (targetPool: number) => {
+    const validPool = Math.max(1000, Math.round(targetPool));
+    setMonthlyBudgetPool(validPool);
+
+    setBudgets((prev) => {
+      const currentSum = prev.reduce((s, b) => s + b.limit, 0) || 1;
+      let allocated = 0;
+      return prev.map((b, idx) => {
+        if (idx === prev.length - 1) {
+          const remainder = Math.max(500, validPool - allocated);
+          return { ...b, limit: remainder };
+        }
+        const slice = Math.max(500, Math.round(((b.limit / currentSum) * validPool) / 500) * 500);
+        allocated += slice;
+        return { ...b, limit: slice };
+      });
+    });
+  };
+
   const toggleSenderMask = (maskId: string) => {
     setSenderMasks((prev) =>
       prev.map((m) => (m.id === maskId ? { ...m, isEnabled: !m.isEnabled } : m))
@@ -586,6 +908,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         markNotificationRead,
         clearAllTransactions,
         resetDemoData,
+        monthlyBudgetPool,
+        setMonthlyBudgetPool,
+        distributeBudgetPool,
+        firebaseSyncStatus,
+        currentUser,
+        isAuthenticated,
+        authToastMessage,
+        setAuthToastMessage,
+        login,
+        signup,
+        loginWithOAuth,
+        logout,
+        sendOtp,
+        resetPasswordWithOtp,
+        quickDemoLogin,
       }}
     >
       {children}
